@@ -11,7 +11,7 @@ import {
 } from './wp-client';
 import { marked } from 'marked';
 import { WpPublishModal } from './wp-publish-modal';
-import { Term } from './wp-api';
+import { Category, Term } from './wp-api';
 import { ERROR_NOTICE_TIMEOUT } from './consts';
 
 
@@ -34,7 +34,7 @@ export abstract class AbstractWordPressClient implements WordPressClient {
       username: string | null,
       password: string | null
     }
-  ): Promise<Term[]>;
+  ): Promise<Category[]>;
 
   abstract validateUser(
     certificate: WordPressAuthParams
@@ -99,7 +99,7 @@ export abstract class AbstractWordPressClient implements WordPressClient {
                 }
               ).open();
             }
-          } else {
+          } else {            
             const invalidUsernameOrPassword = this.plugin.i18n.t('error_invalidUser');
             new Notice(invalidUsernameOrPassword, ERROR_NOTICE_TIMEOUT);
           }
@@ -144,7 +144,8 @@ export abstract class AbstractWordPressClient implements WordPressClient {
     try {
       const result = await this.publish(
         title ?? 'A post from Obsidian!',
-        marked.parse(content) ?? '',
+        // marked.parse(content) ?? '',
+        content,
         postParams,
         {
           username,

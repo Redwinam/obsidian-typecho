@@ -18,3 +18,13 @@ export interface Term {
   parent: string;
   count: number;
 }
+
+export interface Category {
+  categoryId: string;
+  parentId: string;
+  categoryName: string;
+  categoryDescription: string;
+  description: string;
+  htmlUrl: string;
+  rssUrl: string;
+}

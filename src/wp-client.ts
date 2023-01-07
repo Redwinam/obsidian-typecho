@@ -13,7 +13,7 @@ export interface WordPressClientResult {
 export interface WordPressPostParams {
   status: PostStatus;
   commentStatus: CommentStatus;
-  categories: number[];
+  categories: string[];
 }
 
 export interface WordPressAuthParams {

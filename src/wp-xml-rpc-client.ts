@@ -8,7 +8,7 @@ import {
 } from './wp-client';
 import { XmlRpcClient } from './xmlrpc-client';
 import { AbstractWordPressClient } from './abstract-wp-client';
-import { Term } from './wp-api';
+import { Category, Term } from './wp-api';
 import { ERROR_NOTICE_TIMEOUT } from './consts';
 
 interface FaultResponse {
@@ -36,20 +36,19 @@ export class WpXmlRpcClient extends AbstractWordPressClient {
   }
 
   publish(title: string, content: string, postParams: WordPressPostParams, wp: WordPressAuthParams): Promise<WordPressClientResult> {
-    return this.client.methodCall('wp.newPost', [
-      0,
+    return this.client.methodCall('metaWeblog.newPost', [
+      1,
       wp.username,
       wp.password,
       {
         post_type: 'post',
         post_status: postParams.status,
-        comment_status: postParams.commentStatus,
-        post_title: title,
-        post_content: content,
-        terms: {
-          'category': postParams.categories
-        }
-      }
+        mt_allow_comments: postParams.commentStatus,
+        title: title,
+        description: content,
+        categories: postParams.categories
+      },
+      true
     ])
       .then(response => {
         if (isFaultResponse(response)) {
@@ -68,12 +67,11 @@ export class WpXmlRpcClient extends AbstractWordPressClient {
       });
   }
 
-  getCategories(wp: WordPressAuthParams): Promise<Term[]> {
-    return this.client.methodCall('wp.getTerms', [
-      0,
+  getCategories(wp: WordPressAuthParams): Promise<Category[]> {
+    return this.client.methodCall('wp.getCategories', [
+      1,
       wp.username,
-      wp.password,
-      'category'
+      wp.password
     ])
       .then(response => {
         if (isFaultResponse(response)) {
@@ -86,18 +84,21 @@ export class WpXmlRpcClient extends AbstractWordPressClient {
       .then((data: unknown[]) => {
         return data.map((it: any) => ({
           ...it,
-          id: it.term_id
+          id: it.categoryId
         })) ?? [];
       });
   }
 
   validateUser(certificate: WordPressAuthParams): Promise<WordPressClientResult> {
     return this.client.methodCall('wp.getProfile', [
-      0,
+      1,
       certificate.username,
       certificate.password
     ])
       .then(response => {
+
+        new Notice( JSON.stringify(response), ERROR_NOTICE_TIMEOUT);
+
         if (isFaultResponse(response)) {
           return {
             code: WordPressClientReturnCode.Error,

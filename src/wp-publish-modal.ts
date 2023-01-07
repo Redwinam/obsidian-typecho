@@ -1,7 +1,7 @@
 import { App, Modal, Setting } from 'obsidian';
 import WordpressPlugin from './main';
 import { WordPressPostParams } from './wp-client';
-import { CommentStatus, PostStatus, Term } from './wp-api';
+import { CommentStatus, PostStatus, Category } from './wp-api';
 import { toNumber } from 'lodash-es';
 import { TranslateKey } from './i18n';
 
@@ -13,7 +13,7 @@ export class WpPublishModal extends Modal {
   constructor(
     app: App,
     private readonly plugin: WordpressPlugin,
-    private readonly categories: Term[],
+    private readonly categories: Category[],
     private readonly onSubmit: (params: WordPressPostParams, modal: Modal) => void
   ) {
     super(app);
@@ -27,7 +27,7 @@ export class WpPublishModal extends Modal {
     const params: WordPressPostParams = {
       status: this.plugin.settings.defaultPostStatus,
       commentStatus: this.plugin.settings.defaultCommentStatus,
-      categories: [ 1 ]
+      categories: []
     };
 
     const { contentEl } = this;
@@ -61,13 +61,14 @@ export class WpPublishModal extends Modal {
       new Setting(contentEl)
         .setName(t('publishModal_category'))
         .addDropdown((dropdown) => {
+          params.categories = [ this.categories[0].categoryName ];
           this.categories.forEach(it => {
-            dropdown.addOption(it.id, it.name);
+            dropdown.addOption(it.categoryName, it.categoryName);
           });
           dropdown
-            .setValue("1")
+            .setValue(this.categories[0].categoryName)
             .onChange((value) => {
-              params.categories = [ toNumber(value) ];
+              params.categories = [ value ];
             });
         });
     }

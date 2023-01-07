@@ -48,12 +48,13 @@ export class XmlRpcClient {
 
   methodCall(
     method: string,
-    params: unknown
+    params: unknown[]
   ): Promise<unknown> {
     console.log(`Endpoint: ${this.endpoint}, ${method}`, params);
 
     const xml = this.objectToXml(method, params).end({ prettyPrint: true });
     console.log(xml);
+    // new Notice( xml, ERROR_NOTICE_TIMEOUT);
 
     return request({
       url: this.endpoint,
@@ -67,11 +68,12 @@ export class XmlRpcClient {
       .then(res => this.responseToObject(res));
   }
 
-  private objectToXml(method: string, ...obj: unknown[]): XMLBuilder {
+  private objectToXml(method: string, obj: unknown[]): XMLBuilder {
     const xml = create({ version: '1.0' })
       .ele('methodCall')
       .ele('methodName').txt(method).up()
       .ele('params');
+      // new Notice( JSON.stringify(obj), ERROR_NOTICE_TIMEOUT);
     obj.forEach(it => this.createParam(it, xml));
     return xml;
   }
